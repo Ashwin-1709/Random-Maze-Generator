@@ -43,9 +43,10 @@ int32_t main() {
                 int getWeight = AssignWeight();
                 edges.insert({getWeight,j,j+1});
             }
-            if(j + 10 <= n*n) {
+            if(j + n <= n*n) {
+
                 int getWeight = AssignWeight();
-                edges.insert({getWeight,j,j+10});
+                edges.insert({getWeight,j,j+n});
             }
         }
     }
@@ -57,17 +58,16 @@ int32_t main() {
         }
     }
     for(auto x : mst) edges.erase(x);
-    map<pair<int,int>,int>cells;
+    set<pair<int,int>>cells;
     for(auto [w,u,v] : edges) {
-        cells[{u,v}] = 1;
-        cells[{v,u}] = 1;
+        cells.insert({u,v});
     }
     vector<vector<char>>maze(2*n + 1 , vector<char>(2*n+1));
     for(int i = 0 ; i < 2*n + 1 ; i++) {
-      maze[0][i] = '#';
-      maze[2*n][i] = '#';
-      maze[i][0] = '#';
-      maze[i][2*n] = '#';
+      maze[0][i] = 'X';
+      maze[2*n][i] = 'X';
+      maze[i][0] = 'X';
+      maze[i][2*n] = 'X';
     }
     for(int i = 1 ; i < 2*n  ; i++) {
       for(int j = 1 ; j < 2*n ; j++) {
@@ -75,27 +75,16 @@ int32_t main() {
       }
     }
     int cnt = 0;
-    for(int j = 2 ; j < 2*n ; j+=2) {
-      for(int i = 1 ; i < 2*n ; i+=2) {
-        int f = (i+1)/2 - 1 , k = (j+1)/2;
-        if(f*n + k >= n*n) continue;
-        if(cells[{f*n + k , f*n + k + 1}]) {
-           maze[i][j] = '#';
-           maze[i+1][j] = '#'; 
-           cnt++;
+    for(auto [u,v] : cells) {
+        int i = (u/n)*2 + 1 , j = (u % n) ? (u % n)*2 - 1 : 2*n - 2;
+        if(v == u + 1) {
+           maze[i][j+1] = 'X';
+           maze[i-1][j+1] = 'X';
         }
-      }
-    }
-    for(int i = 2 ; i < 2*n  ; i+=2) {
-      for(int j = 1 ; j < 2*n; j+=2) {
-        int f = i/2 - 1 , k = (j+1)/2;
-        if(f*n + k + n > n*n) continue;
-        if(cells[{f*n + k , f*n + k + n}]) {
-           maze[i][j] = '#';
-           maze[i][j+1] = '#';
-           cnt++;
+        else {
+            maze[i+1][j] = 'X';
+            maze[i+1][j+1] = 'X';
         }
-      }
     }
     printmaze(maze,2*n+1);
 }
