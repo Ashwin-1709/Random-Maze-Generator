@@ -69,11 +69,6 @@ int32_t main() {
       maze[i][0] = 'X';
       maze[i][2*n] = 'X';
     }
-    for(int i = 1 ; i < 2*n  ; i++) {
-      for(int j = 1 ; j < 2*n ; j++) {
-        maze[j][i] = '.';
-      }
-    }
     int cnt = 0;
     for(auto [u,v] : cells) {
         int i = (u/n)*2 + 1 , j = (u % n) ? (u % n)*2 - 1 : 2*n - 2;
