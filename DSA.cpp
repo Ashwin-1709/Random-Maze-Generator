@@ -36,12 +36,10 @@ int32_t main() {
             if(j < f + n) {
                 int getWeight = AssignWeight();
                 edges.insert({getWeight,j,j+1});
-                edges.insert({getWeight,j+1,j});
             }
             if(j + 10 <= n*n) {
                 int getWeight = AssignWeight();
                 edges.insert({getWeight,j,j+10});
-                edges.insert({getWeight,j+10,j});
             }
         }
     }
@@ -53,5 +51,9 @@ int32_t main() {
         }
     }
     for(auto x : mst) edges.erase(x);
-    
+    map<pair<int,int>,int>cells;
+    for(auto [w,u,v] : edges) {
+        cells[{u,v}] = 1;
+        cells[{v,u}] = 1;
+    }
 }
