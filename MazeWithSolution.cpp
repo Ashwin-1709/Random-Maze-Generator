@@ -22,96 +22,69 @@ struct DSU
   }
 } dsu;
  
-void printmaze(vector<vector<char>> m , int n,int start, int end)
-{
-    // for (int i = 0; i < n; i++)
-    // {
-    //     for(int j=0;j<n;j++)
-    //     {
-    //         if(m[i][j]=='X')
-    //         {
-    //             if(i%2==0 && j%2) m[i][j]='-';
-    //             else if(i%2==0 && j%2==0) m[i][j]='+';
-    //             else if(i%2) m[i][j]='|';
-    //         }	
-    //         if(i%2==0 && j%2==0) m[i][j]='+';
-    //     }
-    // }
-    for(int i=0;i<2*start+1;i++) cout<<' ';
-    cout<<"v\n";
+void printmaze(vector<vector<char>>&m , int n,int start, int end) {
+    int st = 2*start + 1 , ed = 2*end + 1;
+    while(st--) cout << ' ';
+    cout << 'v' << endl;
     for(int i = 0 ; i < n ; i++) {
-      for(int j = 0 ; j < n ; j++) cout << m[i][j];
-      cout << endl;
+        for(int j = 0 ; j < n ; j++) cout << m[i][j];
+        cout << endl;
     }
-    for(int i=0;i<2*(end)+1;i++) cout<<' ';
-    cout<<"v\n";
+    while(ed--) cout << ' ';
+    cout << 'v' << endl;
 }
  
-int AssignWeight()
-{
+int AssignWeight() {
     return rand() % 150;
 }
- 
-void dijkstra(vector<vector<char>>v, int n, pair<int,int> start, pair<int,int>end)
-{
-    vector<vector<int>> mind(n,vector<int>(n,100000));
-    vector<vector<pair<int,int>>> pt(n,vector<pair<int,int>>(n));
+void dijkstra(vector<vector<char>>v , int n , pair<int,int>start , pair<int,int>end) {
+    vector<vector<int>> dis(n,vector<int>(n,INT_MAX));
+    vector<vector<pair<int,int>>> par(n,vector<pair<int,int>>(n));
     set<pair<int,pair<int,int>>> s;
     s.insert({0,start});
-    while(!s.empty())
-    {
-        pair<int,pair<int,int>> a=*s.begin();
+    while(!s.empty()) {
+        pair<int,pair<int,int>> a = *s.begin();
         s.erase(s.begin());
-        int dist=a.first;
-        int x=a.second.first;
-        int y=a.second.second;
-        if(x<n-1 && v[x+1][y]!='X' && mind[x+1][y]>dist+1)
-        {
-            if(s.find({mind[x+1][y],{x+1,y}})!=s.end()) s.erase(s.find({mind[x+1][y],{x+1,y}}));
-            s.insert({dist+1,{x+1,y}});
-            mind[x+1][y]=dist+1;
-            pt[x+1][y]={x,y};
+        int dist = a.first , x = a.second.first , y = a.second.second;
+        if(x < n - 1 and v[x+1][y] != 'X' and dis[x+1][y] > dist + 1) {
+            if(s.find({dis[x+1][y],{x+1,y}})!=s.end()) s.erase(s.find({dis[x+1][y],{x+1,y}})); 
+            s.insert({dist + 1 , {x+1,y}});
+            dis[x+1][y] = dist + 1; 
+            par[x+1][y] = {x,y};           
         }
-        if(x>0 && v[x-1][y]!='X' && mind[x-1][y]>dist+1)
-        {
-            if(s.find({mind[x-1][y],{x-1,y}})!=s.end()) s.erase(s.find({mind[x-1][y],{x-1,y}}));
+        if(x > 0 and v[x-1][y]!='X' and dis[x-1][y] > dist + 1) {
+            if(s.find({dis[x-1][y],{x-1,y}})!=s.end()) s.erase(s.find({dis[x-1][y],{x-1,y}}));
             s.insert({dist+1,{x-1,y}});
-            mind[x-1][y]=dist+1;
-            pt[x-1][y]={x,y};
+            dis[x-1][y] = dist + 1;
+            par[x-1][y] = {x,y};
         }
-        if(y>0 && v[x][y-1]!='X' && mind[x][y-1]>dist+1)
-        {
-            if(s.find({mind[x][y-1],{x,y-1}})!=s.end()) s.erase(s.find({mind[x][y-1],{x,y-1}}));
+        if(y > 0 and v[x][y-1]!='X' and dis[x][y-1] > dist + 1) {
+            if(s.find({dis[x][y-1],{x,y-1}})!=s.end()) s.erase(s.find({dis[x][y-1],{x,y-1}}));
             s.insert({dist+1,{x,y-1}});
-            mind[x][y-1]=dist+1;
-            pt[x][y-1]={x,y};
+            dis[x][y-1] = dist + 1;
+            par[x][y-1] = {x,y};
         }
-        if(y<n-1&& v[x][y+1]!='X' && mind[x][y+1]>dist+1)
-        {
-            if(s.find({mind[x][y+1],{x,y+1}})!=s.end()) s.erase(s.find({mind[x][y+1],{x,y+1}}));
+        if(y < n-1 and v[x][y+1]!='X' and dis[x][y+1] > dist + 1) {
+            if(s.find({dis[x][y+1],{x,y+1}})!=s.end()) s.erase(s.find({dis[x][y+1],{x,y+1}}));
             s.insert({dist+1,{x,y+1}});
-            mind[x][y+1]=dist+1;
-            pt[x][y+1]={x,y};
+            dis[x][y+1] = dist + 1;
+            par[x][y+1] = {x,y};
         }
     }
-    if(mind[end.first][end.second]>1e9) cout<<"NO\n";
-    else
-    {
-        pair<int,int> x=end;
-        while(x!=start)
-        {
-            int a=x.first;
-            int b=x.second;
-            v[a][b]='.';
-            x=pt[a][b];
-            if(x==start) break;
+    if(dis[end.first][end.second] > 1e9) cout << "No Solution\n";
+    else {
+        pair<int,int>x = end;
+        while(x != start) {
+            int a = x.first , b = x.second;
+            v[a][b] = '.';
+            x = par[a][b];
+            if(x == start) break;
         }
         v[x.first][x.second] = '.';
         printmaze(v,n,start.second/2,end.second/2);
     }
 }
- 
- 
+
 int main() {
     cin.tie(0)->sync_with_stdio(0);
     srand(time(0));
@@ -126,7 +99,6 @@ int main() {
                 edges.insert({getWeight,j,j+1});
             }
             if(j + n <= n*n) {
- 
                 int getWeight = AssignWeight();
                 edges.insert({getWeight,j,j+n});
             }
@@ -151,7 +123,7 @@ int main() {
       maze[i][0] = 'X';
       maze[i][2*n] = 'X';
     }
-    int cnt = 0;
+
     for(auto [u,v] : cells) {
         int i = (u/n)*2 + 1 , j = (u % n) ? (u % n)*2 - 1 : 2*n - 2;
         if(v == u + 1) {
@@ -163,8 +135,7 @@ int main() {
             maze[i+1][j+1] = 'X';
         }
     }
-    int start = rand()%n;
-    int end = rand()%n;
+    int start = rand()%n , end = rand() % n;
     maze[0][2*start+1] = ' ';
     maze[2*n][2*(end)+1] = ' ';
     printmaze(maze,2*n+1,start,end);
