@@ -22,27 +22,28 @@ struct DSU
   }
 } dsu;
 
+void printmaze(vector<vector<char>> &m , int n) {
+    for(int i = 0 ; i < n ; i++) {
+        for(int j = 0 ; j < n ; j++) {
+            if(m[i][j] == 'X') {
+                if(i % 2 == 0 and j % 2) m[i][j] = '-';
+                else if(i % 2 == 0 and j % 2 == 0) m[i][j] = '+';
+                else if(i % 2) m[i][j] = '|';                
+            }
+            if(i % 2 == 0 and j % 2 == 0) m[i][j] = '+';
+        }
+    }
+    for(int i = 0 ; i < n ; i++) {
+        for(int j = 0 ; j < n ; j++) cout << m[i][j];
+        cout << endl;
+    }
+}
+
 int32_t main() {
     cin.tie(0)->sync_with_stdio(0);
     srand(time(0));
     auto AssignWeight = [&]()->int {
         return rand() % 150;
-    };
-    auto printmaze = [](auto &m , int n)->void {
-        for(int i = 0 ; i < n ; i++) {
-          for(int j = 0 ; j < n ; j++) {
-            if(m[i][j] == 'X') {
-                if(i % 2 == 0 and j % 2) m[i][j] = '-';
-                else if(i % 2 == 0 and j % 2 == 0) m[i][j] = '+';
-                else if(i % 2) m[i][j] = '|';
-            }
-            if(i % 2 == 0 and j % 2 == 0) m[i][j] = '+';
-          }
-        }
-        for(int i = 0 ; i < n ; i++) {
-            for(int j = 0 ; j < n ; j++) cout << m[i][j];
-            cout << endl;
-        }
     };
     set<array<int,3>>edges,mst;
     int n; cin >> n;
