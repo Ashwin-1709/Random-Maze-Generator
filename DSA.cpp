@@ -20,22 +20,36 @@ struct DSU
       parent[b] = a , sze[a] += sze[b];
     }
   }
-} dsu;
-
-int32_t main() {
-    cin.tie(0)->sync_with_stdio(0);
-    srand(time(0));
-    auto AssignWeight = [&]()->int {
-        return rand() % 150;
-    };
-    auto printmaze = [](auto &m , int n)->void {
-        for(int i = 0 ; i < n ; i++) {
-          for(int j = 0 ; j < n ; j++) cout << m[i][j];
-          cout << endl;
-        }
-    };
-    set<array<int,3>>edges,mst;
-    int n; cin >> n;
+} ;
+class Maze {
+    public : 
+        set<array<int,3>>edges;
+        set<array<int,3>>mst;
+        vector<vector<char>>maze;
+        int start;
+        int end;
+        int n;
+        void printmaze();
+        void buildmaze();
+        int AssignWeight();
+        Maze(int t);
+};
+Maze::Maze(int t) {
+    n = t;
+    maze.resize(2*n + 1 , vector<char>(2*n  + 1, ' '));
+}
+void Maze::printmaze() {
+    int st = 2*start + 1 , ed = 2*end + 1;
+    while(st--) cout << ' ';
+    cout << 'v' << endl;
+    for(int i = 0 ; i < 2*n + 1 ; i++) {
+        for(int j = 0 ; j < 2*n + 1 ; j++) cout << maze[i][j];
+        cout << endl;
+    }
+    while(ed--) cout << ' ';
+    cout << 'v' << endl;
+}
+void Maze::buildmaze() {
     for(int i = 1 ; i <= n ; i++) {
         int f = (i-1)*n;
         for(int j = f + 1 ; j <= f + n ; j++) {
@@ -44,12 +58,12 @@ int32_t main() {
                 edges.insert({getWeight,j,j+1});
             }
             if(j + n <= n*n) {
-
                 int getWeight = AssignWeight();
                 edges.insert({getWeight,j,j+n});
             }
         }
     }
+    DSU dsu;
     dsu.build(n*n + 1);
     for(auto [w,u,v] : edges) {
         if(dsu.find(u) != dsu.find(v)) {
@@ -62,14 +76,13 @@ int32_t main() {
     for(auto [w,u,v] : edges) {
         cells.insert({u,v});
     }
-    vector<vector<char>>maze(2*n + 1 , vector<char>(2*n+1));
     for(int i = 0 ; i < 2*n + 1 ; i++) {
       maze[0][i] = 'X';
       maze[2*n][i] = 'X';
       maze[i][0] = 'X';
       maze[i][2*n] = 'X';
     }
-    int cnt = 0;
+
     for(auto [u,v] : cells) {
         int i = (u/n)*2 + 1 , j = (u % n) ? (u % n)*2 - 1 : 2*n - 2;
         if(v == u + 1) {
@@ -81,5 +94,75 @@ int32_t main() {
             maze[i+1][j+1] = 'X';
         }
     }
-    printmaze(maze,2*n+1);
+    start = rand() % n;
+    end = rand() % n;
+    maze[0][2*start+1] = ' ';
+    maze[2*n][2*(end)+1] = ' ';
+}
+
+int Maze::AssignWeight() {
+    return rand() % 150;
+}
+int dijkstra(Maze m) {
+    int n = 2*m.n + 1;
+    pair<int,int>start = {0,2*m.start + 1} , end = {2*m.n , 2*m.end + 1};
+    vector<vector<int>> dis(n,vector<int>(n,INT_MAX));
+    vector<vector<pair<int,int>>> par(n,vector<pair<int,int>>(n));
+    set<pair<int,pair<int,int>>> s;
+    s.insert({0,start});
+    while(!s.empty()) {
+        pair<int,pair<int,int>> a = *s.begin();
+        s.erase(s.begin());
+        int dist = a.first , x = a.second.first , y = a.second.second;
+        if(x < n - 1 and m.maze[x+1][y] != 'X' and dis[x+1][y] > dist + 1) {
+            if(s.find({dis[x+1][y],{x+1,y}})!=s.end()) s.erase(s.find({dis[x+1][y],{x+1,y}})); 
+            s.insert({dist + 1 , {x+1,y}});
+            dis[x+1][y] = dist + 1; 
+            par[x+1][y] = {x,y};           
+        }
+        if(x > 0 and m.maze[x-1][y]!='X' and dis[x-1][y] > dist + 1) {
+            if(s.find({dis[x-1][y],{x-1,y}})!=s.end()) s.erase(s.find({dis[x-1][y],{x-1,y}}));
+            s.insert({dist+1,{x-1,y}});
+            dis[x-1][y] = dist + 1;
+            par[x-1][y] = {x,y};
+        }
+        if(y > 0 and m.maze[x][y-1]!='X' and dis[x][y-1] > dist + 1) {
+            if(s.find({dis[x][y-1],{x,y-1}})!=s.end()) s.erase(s.find({dis[x][y-1],{x,y-1}}));
+            s.insert({dist+1,{x,y-1}});
+            dis[x][y-1] = dist + 1;
+            par[x][y-1] = {x,y};
+        }
+        if(y < n-1 and m.maze[x][y+1]!='X' and dis[x][y+1] > dist + 1) {
+            if(s.find({dis[x][y+1],{x,y+1}})!=s.end()) s.erase(s.find({dis[x][y+1],{x,y+1}}));
+            s.insert({dist+1,{x,y+1}});
+            dis[x][y+1] = dist + 1;
+            par[x][y+1] = {x,y};
+        }
+    }
+    if(dis[end.first][end.second] > 1e9) {
+        cout << "No Solution\n";
+        return -1;
+    }
+    else {
+        pair<int,int>x = end;
+        while(x != start) {
+            int a = x.first , b = x.second;
+            m.maze[a][b] = '.';
+            x = par[a][b];
+            if(x == start) break;
+        }
+        m.maze[x.first][x.second] = '.';
+        m.printmaze();
+    }
+    return 0;
+}
+
+int main() {
+    cin.tie(0)->sync_with_stdio(0);
+    srand(time(0));
+    int n; cin >> n;
+    Maze m(n);
+    m.buildmaze();
+    m.printmaze();
+    dijkstra(m);
 }
