@@ -74,16 +74,16 @@ void Maze::buildmaze() {
             mst.insert({w,u,v});
         }
     }
-
     for(auto [w,u,v] : mst) {
-      int i = (u-1)/n , j = (u-1)%n;
-      if(v == u + 1) {
-         maze[2*i + 1][2*j + 2]=' ';
-       }
-      else {
-         maze[2*i + 2][2*j + 1]=' ';
-       }
+        int i = (u-1)/n , j = (u-1)%n;
+        if(v == u+1) {
+            maze[2*i + 1][2*j + 2] = ' ';
+        }
+        else {
+            maze[2*i + 2][2*j + 1] = ' ';
+        }
     }
+
     start = rand() % n;
     end = rand() % n;
     maze[0][2*start+1] = ' ';
@@ -148,11 +148,14 @@ int dijkstra(Maze m) {
 }
 
 int main() {
-    cin.tie(0)->sync_with_stdio(0);
+    
+    cout << "Enter the size of the maze : ";
     srand(time(0));
     int n; cin >> n;
     Maze m(n);
+    cout << "Building the Maze........\n";
     m.buildmaze();
     m.printmaze();
+    cout << "Solution to the Maze using Dijkstra's Algorithm: \n";
     dijkstra(m);
 }
