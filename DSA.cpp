@@ -36,7 +36,10 @@ class Maze {
 };
 Maze::Maze(int t) {
     n = t;
-    maze.resize(2*n + 1 , vector<char>(2*n  + 1, ' '));
+    maze.resize(2*n + 1 , vector<char>(2*n  + 1, 'X'));
+    for(int i = 1 ; i < 2*n + 1 ; i+=2) { 
+        for(int j = 1 ; j < 2*n+1 ; j+=2) maze[i][j]=' ';
+    }
 }
 void Maze::printmaze() {
     int st = 2*start + 1 , ed = 2*end + 1;
@@ -71,28 +74,15 @@ void Maze::buildmaze() {
             mst.insert({w,u,v});
         }
     }
-    for(auto x : mst) edges.erase(x);
-    set<pair<int,int>>cells;
-    for(auto [w,u,v] : edges) {
-        cells.insert({u,v});
-    }
-    for(int i = 0 ; i < 2*n + 1 ; i++) {
-      maze[0][i] = 'X';
-      maze[2*n][i] = 'X';
-      maze[i][0] = 'X';
-      maze[i][2*n] = 'X';
-    }
 
-    for(auto [u,v] : cells) {
-        int i = (u/n)*2 + 1 , j = (u % n) ? (u % n)*2 - 1 : 2*n - 2;
-        if(v == u + 1) {
-           maze[i][j+1] = 'X';
-           maze[i-1][j+1] = 'X';
-        }
-        else {
-            maze[i+1][j] = 'X';
-            maze[i+1][j+1] = 'X';
-        }
+    for(auto [w,u,v] : mst) {
+      int i = (u-1)/n , j = (u-1)%n;
+      if(v == u + 1) {
+         maze[2*i + 1][2*j + 2]=' ';
+       }
+      else {
+         maze[2*i + 2][2*j + 1]=' ';
+       }
     }
     start = rand() % n;
     end = rand() % n;
