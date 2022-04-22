@@ -23,8 +23,6 @@ struct DSU
 } ;
 class Maze {
     public : 
-        set<array<int,3>>edges;
-        set<array<int,3>>mst;
         vector<vector<char>>maze;
         int start;
         int end;
@@ -33,10 +31,16 @@ class Maze {
         void buildmaze();
         int AssignWeight();
         Maze(int t);
+    private : 
+        set<tuple<int,int,int>>edges;
+        set<pair<int,int>>mst;
+        DSU dsu;
+
 };
 Maze::Maze(int t) {
     n = t;
     maze.resize(2*n + 1 , vector<char>(2*n  + 1, 'X'));
+    dsu.build(n*n + 1);
     for(int i = 1 ; i < 2*n + 1 ; i+=2) { 
         for(int j = 1 ; j < 2*n+1 ; j+=2) maze[i][j]=' ';
     }
@@ -66,15 +70,13 @@ void Maze::buildmaze() {
             }
         }
     }
-    DSU dsu;
-    dsu.build(n*n + 1);
     for(auto [w,u,v] : edges) {
         if(dsu.find(u) != dsu.find(v)) {
             dsu.unite(u,v);
-            mst.insert({w,u,v});
+            mst.insert({u,v});
         }
     }
-    for(auto [w,u,v] : mst) {
+    for(auto [u,v] : mst) {
         int i = (u-1)/n , j = (u-1)%n;
         if(v == u+1) {
             maze[2*i + 1][2*j + 2] = ' ';
@@ -91,7 +93,7 @@ void Maze::buildmaze() {
 }
 
 int Maze::AssignWeight() {
-    return rand() % 150;
+    return rand();
 }
 int dijkstra(Maze m) {
     int n = 2*m.n + 1;
@@ -152,10 +154,11 @@ int main() {
     cout << "Enter the size of the maze : ";
     srand(time(0));
     int n; cin >> n;
+    cout << "\n\n";
     Maze m(n);
-    cout << "Building the Maze........\n";
+    cout << "Building the Maze........\n\n";
     m.buildmaze();
     m.printmaze();
-    cout << "Solution to the Maze using Dijkstra's Algorithm: \n";
+    cout << "Solution to the Maze using Dijkstra's Algorithm: \n\n";
     dijkstra(m);
 }
