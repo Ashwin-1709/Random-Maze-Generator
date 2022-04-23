@@ -36,15 +36,15 @@ public:
     int n;
     void printmaze();
     void buildmaze();
-    int AssignWeight();
+    int AssignWeight(); 
     Maze(int t);
-
+ 
 private:
-    set<tuple<int, int, int>> edges;
-    set<pair<int, int>> mst;
+    set<tuple<int, int, int>> edges; // {weight,cell1,cell2} edge between cell1 and cell2
+    set<pair<int, int>> mst; // {cell1,cell2} edge between cell1 and cell2
     DSU dsu;
 };
-Maze::Maze(int t)
+Maze::Maze(int t) //Generating maze with no cells connected yet
 {
     n = t;
     maze.resize(2 * n + 1, vector<char>(2 * n + 1, '-'));
@@ -63,7 +63,7 @@ Maze::Maze(int t)
         }
     }
 }
-void Maze::printmaze()
+void Maze::printmaze() 
 {
     int st = 2 * start + 1, ed = 2 * end + 1;
     while (st--)
@@ -81,45 +81,45 @@ void Maze::printmaze()
 }
 void Maze::buildmaze()
 {
-    for (int i = 1; i <= n; i++)
+    for (int i = 1; i <= n; i++) // cells are numbered from 1 to n*n
     {
         int f = (i - 1) * n;
         for (int j = f + 1; j <= f + n; j++)
         {
-            if (j < f + n)
+            if (j < f + n) 
             {
                 int getWeight = AssignWeight();
-                edges.insert({getWeight, j, j + 1});
+                edges.insert({getWeight, j, j + 1});  // Edge between current cell and right cell
             }
             if (j + n <= n * n)
             {
                 int getWeight = AssignWeight();
-                edges.insert({getWeight, j, j + n});
+                edges.insert({getWeight, j, j + n});  // Edge between current cell and bottom cell
             }
         }
     }
     for (auto [w, u, v] : edges)
     {
-        if (dsu.find(u) != dsu.find(v))
+        if (dsu.find(u) != dsu.find(v)) // unite if u and v dont belong to same component
         {
             dsu.unite(u, v);
             mst.insert({u, v});
         }
     }
-    for (auto [u, v] : mst)
+    for (auto [u, v] : mst) // Removing edges that are present in MST to generate the maze
     {
         int i = (u - 1) / n, j = (u - 1) % n;
         if (v == u + 1) maze[2 * i + 1][2 * j + 2] = ' ';
         else maze[2 * i + 2][2 * j + 1] = ' ';
     }
-
+ 
     start = rand() % n;
     end = rand() % n;
     maze[0][2 * start + 1] = ' ';
     maze[2 * n][2 * (end) + 1] = ' ';
 }
-
-int Maze::AssignWeight()
+ 
+int Maze::AssignWeight() // Generates Random Weight
 {
     return rand()%1000;
 }
@@ -127,57 +127,57 @@ int dijkstra(Maze m)
 {
     int n = 2 * m.n + 1;
     pair<int, int> start = {0, 2 * m.start + 1}, end = {2 * m.n, 2 * m.end + 1};
-    vector<vector<int>> dis(n, vector<int>(n, INT_MAX));
-    vector<vector<pair<int, int>>> par(n, vector<pair<int, int>>(n));
-    set<pair<int, pair<int, int>>> s;
+    vector<vector<int>> dis(n, vector<int>(n, INT_MAX)); // stores min distance from start to the current cell
+    vector<vector<pair<int, int>>> par(n, vector<pair<int, int>>(n)); // storing the parent cell of each cell , used for backtracking the solution
+    set<pair<int, pair<int, int>>> s; // stores {min distance to reach the cell , cell}
     s.insert({0, start});
     while (!s.empty())
     {
         pair<int, pair<int, int>> a = *s.begin();
         s.erase(s.begin());
         int dist = a.first, x = a.second.first, y = a.second.second;
-        if (x < n - 1 and m.maze[x + 1][y] == ' ' and dis[x + 1][y] > dist + 1)
+        if (x < n - 1 and m.maze[x + 1][y] == ' ' and dis[x + 1][y] > dist + 1) // checking if distance to cell can be minimised
         {
             if (s.find({dis[x + 1][y], {x + 1, y}}) != s.end())
                 s.erase(s.find({dis[x + 1][y], {x + 1, y}}));
             s.insert({dist + 1, {x + 1, y}});
-            dis[x + 1][y] = dist + 1;
+            dis[x + 1][y] = dist + 1; // updating the min distance as min distance of parent + 1
             par[x + 1][y] = {x, y};
         }
-        if (x > 0 and m.maze[x - 1][y] == ' ' and dis[x - 1][y] > dist + 1)
+        if (x > 0 and m.maze[x - 1][y] == ' ' and dis[x - 1][y] > dist + 1) // checking if distance to cell can be minimised
         {
             if (s.find({dis[x - 1][y], {x - 1, y}}) != s.end())
                 s.erase(s.find({dis[x - 1][y], {x - 1, y}}));
             s.insert({dist + 1, {x - 1, y}});
-            dis[x - 1][y] = dist + 1;
-            par[x - 1][y] = {x, y};
+            dis[x - 1][y] = dist + 1; // updating the min distance as min distance of parent + 1
+            par[x - 1][y] = {x, y}; 
         }
-        if (y > 0 and m.maze[x][y - 1] == ' ' and dis[x][y - 1] > dist + 1)
+        if (y > 0 and m.maze[x][y - 1] == ' ' and dis[x][y - 1] > dist + 1) // checking if distance to cell can be minimised
         {
             if (s.find({dis[x][y - 1], {x, y - 1}}) != s.end())
                 s.erase(s.find({dis[x][y - 1], {x, y - 1}}));
             s.insert({dist + 1, {x, y - 1}});
-            dis[x][y - 1] = dist + 1;
+            dis[x][y - 1] = dist + 1; // updating the min distance as min distance of parent + 1
             par[x][y - 1] = {x, y};
         }
-        if (y < n - 1 and m.maze[x][y + 1] == ' ' and dis[x][y + 1] > dist + 1)
+        if (y < n - 1 and m.maze[x][y + 1] == ' ' and dis[x][y + 1] > dist + 1) // checking if distance to cell can be minimised
         {
             if (s.find({dis[x][y + 1], {x, y + 1}}) != s.end())
                 s.erase(s.find({dis[x][y + 1], {x, y + 1}}));
             s.insert({dist + 1, {x, y + 1}});
-            dis[x][y + 1] = dist + 1;
+            dis[x][y + 1] = dist + 1; // updating the min distance as min distance of parent + 1
             par[x][y + 1] = {x, y};
         }
     }
-    if (dis[end.first][end.second] > 1e9)
+    if (dis[end.first][end.second] > 1e9) // Solution will always exist since MST always forms a connected component including all cells
     {
         cout << "No Solution\n";
         return -1;
     }
     else
     {
-        pair<int, int> x = end;
-        while (x != start)
+        pair<int, int> x = end; 
+        while (x != start) // Backtracking the Maze Solution
         {
             int a = x.first, b = x.second;
             m.maze[a][b] = '\'';
@@ -190,10 +190,10 @@ int dijkstra(Maze m)
     }
     return 0;
 }
-
+ 
 int main()
 {
-
+ 
     cout << "Enter the size of the maze : ";
     srand(time(0));
     int n;
